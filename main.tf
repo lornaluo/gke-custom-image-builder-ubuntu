@@ -94,8 +94,7 @@ resource "google_storage_bucket_object" "setup_kernel_params_script" {
 
 # Module to define the Cloud Build pipeline for the Ubuntu image
 module "gke-ubuntu-image-pipeline" {
-  # TODO(b/442893863): Change to use an official Google Cloud repo.
-  source  = "github.com/lornaluo/compute-image-import//image_builder/modules/imagebuild"
+  source  = "./modules/imagebuild"
   project_id = var.project_id
   pipeline_name = "gke-ubuntu-custom-image-build"
   region = var.region
