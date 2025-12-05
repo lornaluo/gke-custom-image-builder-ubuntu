@@ -12,62 +12,50 @@ This template sets up an automated pipeline using:
 *   **Terraform:** To provision the necessary Cloud Build triggers, service accounts, and Artifact Registry repository.
 *   **Example Configurations:** The examples use configuration files (`*.pkr.hcl`) designed for use with HashiCorp Packer. The Cloud Build pipeline is configured to use a Packer container image from your Artifact Registry.
 
+
 ## Prerequisites
 
 *   An active Google Cloud project with billing enabled.
-*   The following APIs enabled: Compute Engine, Cloud Build, IAM, Cloud Storage, Artifact Registry.
-*   Google Cloud SDK (`gcloud`) installed and authenticated on your local machine (for deploying Terraform and interacting with GCP).
-*   Terraform installed and authenticated on your local machine (for deploying the pipeline infrastructure).
+*   The following APIs enabled: Compute Engine, Cloud Build, IAM, and Cloud Storage.
+*   Google Cloud SDK (`gcloud`) installed and authenticated on your local machine.
+*   Terraform installed on your local machine.
 
-## Hosting Packer in Artifact Registry (Recommended)
+## How to Use This Project
 
-For enhanced security and version control, it is recommended to host the Packer builder image in your own Artifact Registry. By default, Cloud Build might use public builder images.
+1.  **Configure Your Environment**
 
-This template assumes you have a Packer container image available in your Artifact Registry. You can follow the guide in the [TODO update once available: Ubuntu User Guide - Hosting Packer in Artifact Registry] to build and push a Packer image. The `cloudbuild.yaml` should be updated to reference this image.
+    *   In the root of this repository, create a `terraform.tfvars` file. This file is where you will provide your project-specific settings.
+    *   Add the following content to your `terraform.tfvars` file, replacing the placeholder values with your own:
 
-**Example `cloudbuild.yaml` step using Packer from AR:**
-```yaml
-steps:
-  - name: 'us-central1-docker.pkg.dev/YOUR_PROJECT_ID/packer/packer:latest' # Example path
-    args: ['build', 'scripts/ubuntu/customize_ubuntu.pkr.hcl']
-    # ... other options
-```
-
-## How to Use This Template
-
-1.  **Create Your Repository:** Click the "Use this template" button on GitHub to create a new repository under your own organization or user account.
-2.  **Clone Your Repository:** Clone your newly created repository to your local machine.
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-    cd YOUR_REPOSITORY_NAME
-    ```
-3.  **Configure `main.tf`:**
-    *   Open `main.tf` and update the `project_id` variable to your Google Cloud project ID.
     ```terraform
-    variable "project_id" {
-      description = "The GCP project ID"
-      type        = string
-      # Replace with your project ID
-      # default     = "your-gcp-project-id"
-    }
+    project_id          = "your-gcp-project-id"
+    source_image        = "ubuntu-gke-2404-1-33-amd64-v20250812" # Example, change if needed
+    target_image_name   = "my-gke-custom-ubuntu"
     ```
-4.  **Customize the Build:**
-    *   **`scripts/ubuntu/customize_ubuntu.pkr.hcl`:** This is the main Packer template. Modify the `provisioner` blocks to add your desired customizations.
-    *   **`scripts/ubuntu/`:** Add any shell scripts referenced by your Packer template in this directory.
-    *   **Base Image:** Update the `source_image` in `main.tf` to the GKE Ubuntu base image you want to build upon. See [TODO update once available How to Choose a Base Image] in the main user guide.
-    *   **`cloudbuild.yaml`:** Verify the Packer image path matches your Artifact Registry location.
+    *   See `variables.tf` for other optional variables you can override.
 
-5.  **Deploy the Cloud Build Trigger:**
-    Initialize and apply Terraform. This will set up the necessary resources, including the Artifact Registry repository if it doesn't exist (as defined in your Terraform code) and the Cloud Build trigger.
-    ```bash
-    terraform init
-    terraform apply
-    ```
+2.  **Customize the Build**
 
-6.  **Run the Build:**
-    *   Navigate to the Cloud Build > Triggers page in the Google Cloud Console.
-    *   Find the trigger named `gke-ubuntu-custom-image-build`.
-    *   Click "Run" to manually trigger the build.
+    *   **Packer Template:** Modify `scripts/ubuntu/customize_ubuntu.pkr.hcl`. The `provisioner "shell"` blocks are where you can add or change commands to customize the image.
+    *   **Customization Scripts:** Add or edit shell scripts in the `scripts/ubuntu/` directory. The example includes scripts for installing packages and setting kernel parameters.
+
+3.  **Deploy the Pipeline and Run the Build**
+
+    *   Initialize Terraform. This will download the necessary providers and set up the local module.
+        ```bash
+        terraform init
+        ```
+    *   Apply the Terraform configuration. This will provision all the GCP resources and create the Cloud Build trigger.
+        ```bash
+        terraform apply
+        ```
+    *   To initiate a build, navigate to the Cloud Build > Triggers page in the Google Cloud Console. Find the trigger named `gke-ubuntu-custom-image-build` (or your custom `trigger_name`) and click the "Run" button to manually trigger the build.
+    *   You can monitor the build progress in the Cloud Build History page.
+
+4.  **Verify the Image**
+
+    *   After the `terraform apply` command completes, your new image will be available in your GCP project. You can find it in the Google Cloud Console under **Compute Engine > Images**.
+    *   The image will be named according to your `target_image_name` variable, with a unique build ID appended to it (e.g., `my-gke-custom-ubuntu-xxxxxxxx`).
 
 ## Disclaimer
 
