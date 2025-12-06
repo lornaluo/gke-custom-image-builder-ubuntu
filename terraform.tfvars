@@ -2,18 +2,17 @@
 # MANDATORY SETTINGS
 # ------------------------------------------------------------------------------
 project_id = "my-google-project" # !!! REPLACE THIS VALUE !!!
+source_image = "ubuntu-gke-2404-1-33-amd64-v20250812" # !!! REPLACE THIS VALUE !
+
+# --- Image Settings ---
+# Note: A 9-character build ID (e.g., '-c3a8b2d2') will be automatically appended.
+# The total image name must be <= 63 characters, so target_image_name should be <= 54 characters.
+target_image_name = "my-gke-custom-ubuntu"  # !!! REPLACE THIS VALUE !!!
+target_image_family = "my-gke-custom-ubuntu-family"  # !!! REPLACE THIS VALUE !!!
+
 
 # ------------------------------------------------------------------------------
 # OPTIONAL SETTINGS (Defaults are in variables.tf)
 # ------------------------------------------------------------------------------
 # region = "us-central1"
 # zone   = "us-central1-c"
-
-# --- Image Settings ---
-# source_image = "ubuntu-gke-2404-1-33-amd64-v20250812"
-# source_image_project = "ubuntu-os-gke-cloud"
-# target_image_name = "my-gke-custom-ubuntu"
-# target_image_family = "my-gke-custom-ubuntu-family"
-
-# --- Network Settings ---
-# network_name = "default"
