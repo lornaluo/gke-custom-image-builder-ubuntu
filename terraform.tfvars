@@ -2,7 +2,7 @@
 # MANDATORY SETTINGS
 # ------------------------------------------------------------------------------
 project_id = "my-google-project" # !!! REPLACE THIS VALUE !!!
-source_image = "ubuntu-gke-2404-1-33-amd64-v20250812" # !!! REPLACE THIS VALUE !
+source_image = "projects/ubuntu-os-gke-cloud/global/images/ubuntu-gke-2404-1-33-amd64-v20250812" # !!! REPLACE THIS VALUE !
 
 # --- Image Settings ---
 # Note: A 9-character build ID (e.g., '-c3a8b2d2') will be automatically appended.
