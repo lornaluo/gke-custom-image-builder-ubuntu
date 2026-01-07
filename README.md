@@ -75,6 +75,51 @@ This template assumes you have a Packer container image available in your Artifa
     *   After the Triggers `Run` command completes, your new image will be available in your GCP project. You can find it in the Google Cloud Console under **Compute Engine > Images**.
     *   The image will be named according to your `target_image_name` variable, with a unique build ID appended to it (e.g., `my-gke-custom-ubuntu-xxxxxxxx`).
 
+## Examples
+
+### Installing the NVIDIA CUDA Toolkit
+
+This repository includes an example script to install the NVIDIA CUDA toolkit. To use it, you will need to:
+
+1.  **Copy the example script** from `examples/install-cuda-toolkit/install_cuda_toolkit.sh` to `scripts/ubuntu/install_cuda_toolkit.sh`.
+    ```bash
+    cp examples/install-cuda-toolkit/install_cuda_toolkit.sh scripts/ubuntu/install_cuda_toolkit.sh
+    ```
+
+2.  **Update `main.tf` to upload the script to GCS.** To ensure the `install_cuda_toolkit.sh` script is available in the Cloud Build environment, you must add a `google_storage_bucket_object` resource to your `main.tf` file, similar to the other script uploads. For example:
+    ```terraform
+    resource "google_storage_bucket_object" "install_cuda_toolkit_script" {
+      bucket = google_storage_bucket.imagebuild_scripts.name
+      name   = "ubuntu_scripts/install_cuda_toolkit.sh"
+      source = "${path.module}/scripts/ubuntu/install_cuda_toolkit.sh"
+    }
+    ```
+    This resource will upload the script to your GCS bucket when `terraform apply` is executed.
+
+3.  **Modify `scripts/ubuntu/customize_ubuntu.pkr.hcl`** to include a new `provisioner` block that runs the script. Add the following block to the file:
+
+    ```hcl
+    provisioner "shell" {
+      script = "install_cuda_toolkit.sh"    
+      execute_command = "sudo /bin/bash {{.Path}}"
+    }
+    ```
+
+    You can add this after the existing provisioner block.
+
+4.  **Deploy the Pipeline and Run the Build:**
+    *   **Commit your changes.** After copying the script, updating `main.tf`, and modifying `customize_ubuntu.pkr.hcl`, commit these changes to your repository.
+        ```bash
+        git add .
+        git commit -m "feat: Add NVIDIA CUDA Toolkit example"
+        ```
+    *   After making the above modifications, run `terraform apply` again. This step ensures your updated `main.tf` provisions the new GCS object and your `customize_ubuntu.pkr.hcl` is uploaded with the correct reference.
+        ```bash
+        terraform apply
+        ```
+    *   Then, to initiate a build, navigate to the **Cloud Build > Triggers** page in the Google Cloud Console. Find the trigger named `gke-ubuntu-custom-image-build` (or your custom `trigger_name`) and click the "Run" button to manually trigger the build.
+    *   You can monitor the build progress in the Cloud Build History page.
+
 ## Disclaimer
 
 This repository provides templates and examples. You are responsible for any modifications and the resulting images. Google does not provide support for third-party tools like HashiCorp Packer.
