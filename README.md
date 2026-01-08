@@ -53,6 +53,8 @@ This template assumes you have a Packer container image available in your Artifa
     *   **`scripts/ubuntu/`:** Add any shell scripts referenced by your Packer template in this directory.
     *   **`main.tf`:** Add new resource blocks for your new shell scripts, so that the scripts can be uploaded to the GCS bucket by `terraform apply`.
 
+    > NOTE: Any changes to scripts will require re-running `terraform apply`
+
 3.  **Deploy the Pipeline**
 
     *   Initialize Terraform. This will download the necessary providers and set up the local module.
